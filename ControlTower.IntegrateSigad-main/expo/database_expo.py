@@ -54,16 +54,17 @@ def run_database_expo():
         print(f"Error al parsear el archivo XML: {e}")
         exit()
 
-    def clean_text(text, is_numeric=False):
+    def clean_text(text):
         if text is not None:
-            text = text.strip()
-            if is_numeric:  # Para valores numéricos
-                return text.replace('.', ',')  # Reemplazar punto por coma
-            if text.replace('.', '', 1).isdigit():  # Si es numérico
-                return text.replace('.', ',')  # Reemplazar punto por coma
-            else:
-                return text  # Para otros campos
-        return text
+            text = text.strip()  # Elimina espacios en blanco
+            # Verificar si el texto puede convertirse a float
+            try:
+                # Si se puede convertir a float, reemplazar comas por puntos
+                return str(float(text.replace(',', '.')))
+            except ValueError:
+                # Si no es un número, devolver el texto original
+                return text
+        return text  # Retorna None si el texto es None
 
     # Extraer los datos del XML a una lista de diccionarios, eliminando espacios
     data = []
@@ -87,16 +88,19 @@ def run_database_expo():
             '[PAIS ADQ DESCRIPCION]': clean_text(registro.find('NOMBRE_PAIS_ADQ').text) if registro.find('NOMBRE_PAIS_ADQ') is not None else None,
             '[PUERTO EMB DESCRIPCION]': clean_text(registro.find('NOMBRE_PUERTO_EMB').text) if registro.find('NOMBRE_PUERTO_EMB') is not None else None,
             '[TIPO TRAMITE]': clean_text(registro.find('TIPOTRAMITE').text) if registro.find('TIPOTRAMITE') is not None else None,
-            '[VALOR CIF]': clean_text(str(registro.find('VALOR_CIF').text), is_numeric=True) if registro.find('VALOR_CIF') is not None else '0',            '[VALOR FLETE]': clean_text(str(registro.find('VALOR_FLE').text)) if registro.find('VALOR_FLE') is not None else '0',
+            '[VALOR CIF]': clean_text(str(registro.find('VALOR_CIF').text)) if registro.find('VALOR_CIF') is not None else '0',
+            '[VALOR FLETE]': clean_text(str(registro.find('VALOR_FLE').text)) if registro.find('VALOR_FLE') is not None else '0',
             '[VALOR SEG]': clean_text(str(registro.find('VALOR_SEG').text)) if registro.find('VALOR_SEG') is not None else '0',
-            '[VALOR FOB]': clean_text(str(registro.find('VALOR_FOB').text), is_numeric=True) if registro.find('VALOR_FOB') is not None else '0',            '[VALOR EXFAB]': clean_text(str(registro.find('VALOR_EXFAB').text)) if registro.find('VALOR_EXFAB') is not None else '0',
+            '[VALOR FOB]': clean_text(str(registro.find('VALOR_FOB').text)) if registro.find('VALOR_FOB') is not None else '0',
+            '[VALOR EXFAB]': clean_text(str(registro.find('VALOR_EXFAB').text)) if registro.find('VALOR_EXFAB') is not None else '0',
             '[VALOR DERECHOS]': clean_text(str(registro.find('VALOR_DEREC').text)) if registro.find('VALOR_DEREC') is not None else '0',
             '[BULTOS TIPO]': clean_text(registro.find('CLASE_BULTOS').text) if registro.find('CLASE_BULTOS') is not None else None,
             '[BULTOS DESCRIPCION]': clean_text(registro.find('DESC_BULTOS').text) if registro.find('DESC_BULTOS') is not None else None,
             '[BULTOS CANTIDAD]': clean_text(str(registro.find('QBULTOS').text)) if registro.find('QBULTOS') is not None else '0',
             '[BULTOS SUBCONTINENTE]': clean_text(registro.find('SUB_CONTINENTE').text) if registro.find('SUB_CONTINENTE') is not None else None,
             '[CONSIGNANTE NOMBRE]': clean_text(registro.find('NOMBRE_CONSIG').text) if registro.find('NOMBRE_CONSIG') is not None else None,
-            '[KILOS BRUTOS]': clean_text(str(registro.find('KILOS_BRT').text), is_numeric=True) if registro.find('KILOS_BRT') is not None else '0',            '[MANIFIESTO FECHA]': clean_text(registro.find('FECHA_MANIF').text) if registro.find('FECHA_MANIF') is not None else None,
+            '[KILOS BRUTOS]': clean_text(str(registro.find('KILOS_BRT').text)) if registro.find('KILOS_BRT') is not None else '0',
+            '[MANIFIESTO FECHA]': clean_text(registro.find('FECHA_MANIF').text) if registro.find('FECHA_MANIF') is not None else None,
             '[OBSERVACIONES]': clean_text(registro.find('OBSERVACIONES').text) if registro.find('OBSERVACIONES') is not None else None,
             '[CLIENTE CODIGO]': clean_text(registro.find('ID_CLIE').text) if registro.find('ID_CLIE') is not None else None,
             '[RUT CLIENTE]': clean_text(registro.find('RUT_CLIE').text) if registro.find('RUT_CLIE') is not None else None,
@@ -116,6 +120,8 @@ def run_database_expo():
             '[VIA TRANSPORTE DESC]': clean_text(registro.find('DESC_VIATRAN').text) if registro.find('DESC_VIATRAN') is not None else None,
             '[CLAUSULA COMPRAVEN CODIGO]': clean_text(str(registro.find('ID_COMPRAVEN').text)) if registro.find('ID_COMPRAVEN') is not None else None
         }
+
+
         data.append(fields)
 
 
